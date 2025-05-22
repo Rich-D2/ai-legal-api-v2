@@ -1,21 +1,27 @@
 name: Build React App
 on:
   push:
-    branches: [ main ]
+    branches: [ "*" ]  # Trigger on any branch
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Ensure full history for git push
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
     - name: Install dependencies
-      run: cd frontend && npm install
+      run: |
+        cd frontend
+        npm install --verbose
     - name: Build React app
-      run: cd frontend && npm run build
+      run: |
+        cd frontend
+        npm run build --verbose
     - name: Move build folder
       run: mv frontend/build .
     - name: Commit build folder
