@@ -9,11 +9,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Ensure full history for git push
+        fetch-depth: 0
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+    - name: Log environment
+      run: |
+        node --version
+        npm --version
+        ls -la
+        cat frontend/package.json
     - name: Install dependencies
       run: |
         cd frontend
