@@ -1,0 +1,29 @@
+name: Build React App
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install dependencies
+      run: cd frontend && npm install
+    - name: Build React app
+      run: cd frontend && npm run build
+    - name: Move build folder
+      run: mv frontend/build .
+    - name: Commit build folder
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add build
+        git commit -m "Add React build folder" || echo "No changes to commit"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
