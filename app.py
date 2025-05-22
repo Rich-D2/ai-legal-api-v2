@@ -21,7 +21,10 @@ def serve(path):
     file_path = os.path.join(app.static_folder, path)
     if os.path.isfile(file_path):
         return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
+    index_path = os.path.join(app.static_folder, "index.html")
+    if os.path.exists(index_path):
+        return send_from_directory(app.static_folder, "index.html")
+    return jsonify({"error": "React build folder not found. Please check deployment."}), 500
 
 # Document upload (Customer/Paralegal)
 @app.route("/api/documents", methods=["POST"])
