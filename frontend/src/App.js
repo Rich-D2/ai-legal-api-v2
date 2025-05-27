@@ -13,6 +13,7 @@ function App() {
         <Route path="/paralegal" element={<ParalegalDashboard />} />
         <Route path="/lawyer" element={<LawyerDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="*" element={<CustomerDashboard />} /> {/* Fallback */}
       </Routes>
     </BrowserRouter>
   );
