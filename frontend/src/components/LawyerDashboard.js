@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Card, Table, Button, Alert } from 'react-bootstrap';
 
 function LawyerDashboard() {
   const [documents, setDocuments] = useState([]);
@@ -18,22 +19,34 @@ function LawyerDashboard() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Lawyer Dashboard</h1>
-      <div>
-        <h2>Documents</h2>
-        <ul>
-          {documents.map(doc => (
-            <li key={doc}>
-              {doc}
-              <button onClick={() => handleAIProcess(doc)} style={{ marginLeft: '10px' }}>
-                Process with AI
-              </button>
-            </li>
-          ))}
-        </ul>
-        <p>{message}</p>
-      </div>
+    <div>
+      <h2>Lawyer Dashboard</h2>
+      {message && <Alert variant="info">{message}</Alert>}
+      <Card>
+        <Card.Header>Documents</Card.Header>
+        <Card.Body>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.map(doc => (
+                <tr key={doc}>
+                  <td>{doc}</td>
+                  <td>
+                    <Button variant="link" onClick={() => handleAIProcess(doc)}>
+                      Process with AI
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
     </div>
   );
 }
