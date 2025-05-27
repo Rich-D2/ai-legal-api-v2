@@ -14,10 +14,12 @@ if not os.path.exists(TASKS_FILE):
     with open(TASKS_FILE, "w") as f:
         json.dump([], f)
 
-# Serve React app
+# Serve React app for all non-API routes
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
+    if path.startswith("api/"):
+        return jsonify({"error": "API route not found"}), 404
     file_path = os.path.join(app.static_folder, path)
     if os.path.isfile(file_path):
         return send_from_directory(app.static_folder, path)
@@ -86,7 +88,7 @@ def ai_process():
     return jsonify({"message": f"AI processing placeholder for {document}"})
 
 # Debug route
-@app.route("/debug-list")
+@app.route("/api/debug-list")
 def debug_list():
     try:
         return jsonify({"build_contents": os.listdir("./build")})
