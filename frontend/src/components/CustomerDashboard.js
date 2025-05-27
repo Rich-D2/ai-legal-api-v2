@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Form, Button, Table, Modal, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function CustomerDashboard() {
   const [file, setFile] = useState(null);
@@ -10,15 +12,25 @@ function CustomerDashboard() {
   const [tasks, setTasks] = useState([]);
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('/api/documents')
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    const decoded = jwtDecode(token);
+    const userId = decoded.user_id;
+
+    axios.get('/api/documents', { headers: { Authorization: `Bearer ${token}` } })
       .then(response => setDocuments(response.data.documents))
       .catch(error => setMessage('Error fetching documents'));
-    axios.get('/api/tasks')
+
+    axios.get('/api/tasks', { headers: { Authorization: `Bearer ${token}` } })
       .then(response => setTasks(response.data.tasks))
       .catch(error => setMessage('Error fetching tasks'));
-  }, []);
+  }, [navigate]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -29,9 +41,10 @@ function CustomerDashboard() {
       setMessage('Please select a file');
       return;
     }
+    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('file', file);
-    axios.post('/api/documents', formData)
+    axios.post('/api/documents', formData, { headers: { Authorization: `Bearer ${token}` } })
       .then(response => {
         setMessage(response.data.message);
         setDocuments([...documents, response.data.filename]);
@@ -45,7 +58,10 @@ function CustomerDashboard() {
       setMessage('Please select a document and enter a description');
       return;
     }
-    axios.post('/api/tasks', { document: selectedDocument, description: taskDescription })
+    const token = localStorage.getItem('token');
+    axios.post('/api/tasks', { document: selectedDocument, description: taskDescription }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(response => {
         setMessage(response.data.message);
         setTasks([...tasks, response.data.task]);
@@ -57,7 +73,8 @@ function CustomerDashboard() {
   };
 
   const handleAIProcess = (doc) => {
-    axios.post('/api/ai/process', { document: doc })
+    const token = localStorage.getItem('token');
+    axios.post('/api/ai/process', { document: doc }, { headers: { Authorization: `Bearer ${token}` } })
       .then(response => setMessage(response.data.message))
       .catch(error => setMessage('Error processing with AI'));
   };
@@ -120,7 +137,7 @@ function CustomerDashboard() {
         </Card.Body>
       </Card>
       <Card className="mb-4">
-        <Card.Header>Documents</Card.Header>
+        <Card.Header>My Documents</Card.Header>
         <Card.Body>
           <Table striped bordered hover>
             <thead>
@@ -145,7 +162,7 @@ function CustomerDashboard() {
         </Card.Body>
       </Card>
       <Card>
-        <Card.Header>Tasks</Card.Header>
+        <Card.Header>My Tasks</Card.Header>
         <Card.Body>
           <Table striped bordered hover>
             <thead>
