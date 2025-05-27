@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Card, Table, Alert } from 'react-bootstrap';
 
 function AdminDashboard() {
   const [documents, setDocuments] = useState([]);
@@ -16,27 +17,51 @@ function AdminDashboard() {
   }, []);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Admin Dashboard</h1>
-      <div>
-        <h2>Documents</h2>
-        <ul>
-          {documents.map(doc => (
-            <li key={doc}>{doc}</li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h2>Tasks</h2>
-        <ul>
-          {tasks.map(task => (
-            <li key={task.id}>
-              {task.document}: {task.description} ({task.status})
-            </li>
-          ))}
-        </ul>
-      </div>
-      <p>{message}</p>
+    <div>
+      <h2>Admin Dashboard</h2>
+      {message && <Alert variant="info">{message}</Alert>}
+      <Card className="mb-4">
+        <Card.Header>Documents</Card.Header>
+        <Card.Body>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Document</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.map(doc => (
+                <tr key={doc}>
+                  <td>{doc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+      <Card>
+        <Card.Header>Tasks</Card.Header>
+        <Card.Body>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Description</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasks.map(task => (
+                <tr key={task.id}>
+                  <td>{task.document}</td>
+                  <td>{task.description}</td>
+                  <td>{task.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
     </div>
   );
 }
