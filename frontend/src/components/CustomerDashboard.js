@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, Form, Button, ListGroup, Modal, Alert } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function CustomerDashboard() {
   const [file, setFile] = useState(null);
@@ -8,9 +10,9 @@ function CustomerDashboard() {
   const [selectedDocument, setSelectedDocument] = useState('');
   const [tasks, setTasks] = useState([]);
   const [message, setMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    // Fetch documents and tasks
     axios.get('/api/documents')
       .then(response => setDocuments(response.data.documents))
       .catch(error => setMessage('Error fetching documents'));
@@ -50,6 +52,7 @@ function CustomerDashboard() {
         setTasks([...tasks, response.data.task]);
         setTaskDescription('');
         setSelectedDocument('');
+        setShowModal(false);
       })
       .catch(error => setMessage('Error submitting task'));
   };
@@ -61,58 +64,86 @@ function CustomerDashboard() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <Container className="my-4">
       <h1>Customer Dashboard</h1>
-      <div>
+      {message && <Alert variant="info">{message}</Alert>}
+      <div className="mb-4">
         <h2>Upload Document</h2>
-        <input type="file" onChange={handleFileChange} />
-        <button onClick={handleUpload}>Upload</button>
+        <Form>
+          <Form.Group controlId="formFile" className="mb-3">
+            <Form.Control type="file" onChange={handleFileChange} />
+          </Form.Group>
+          <Button variant="primary" onClick={handleUpload}>Upload</Button>
+        </Form>
       </div>
-      <div>
+      <div className="mb-4">
         <h2>Submit Task to Paralegal</h2>
-        <select
-          value={selectedDocument}
-          onChange={(e) => setSelectedDocument(e.target.value)}
-        >
-          <option value="">Select a document</option>
-          {documents.map(doc => (
-            <option key={doc} value={doc}>{doc}</option>
-          ))}
-        </select>
-        <input
-          type="text"
-          value={taskDescription}
-          onChange={(e) => setTaskDescription(e.target.value)}
-          placeholder="Task description"
-          style={{ margin: '10px', width: '300px' }}
-        />
-        <button onClick={handleTaskSubmit}>Submit Task</button>
+        <Button variant="outline-primary" onClick={() => setShowModal(true)}>
+          Create Task
+        </Button>
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Create Task</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formDocumentSelect" className="mb-3">
+                <Form.Label>Select Document</Form.Label>
+                <Form.Select
+                  value={selectedDocument}
+                  onChange={(e) => setSelectedDocument(e.target.value)}
+                >
+                  <option value="">Select a document</option>
+                  {documents.map(doc => (
+                    <option key={doc} value={doc}>{doc}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group controlId="formTaskDescription" className="mb-3">
+                <Form.Label>Task Description</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  placeholder="Task description"
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
+            <Button variant="primary" onClick={handleTaskSubmit}>Submit Task</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
-      <div>
+      <div className="mb-4">
         <h2>Documents</h2>
-        <ul>
+        <ListGroup>
           {documents.map(doc => (
-            <li key={doc}>
+            <ListGroup.Item key={doc}>
               {doc}
-              <button onClick={() => handleAIProcess(doc)} style={{ marginLeft: '10px' }}>
+              <Button
+                variant="link"
+                onClick={() => handleAIProcess(doc)}
+                className="ms-2"
+              >
                 Process with AI
-              </button>
-            </li>
+              </Button>
+            </ListGroup.Item>
           ))}
-        </ul>
+        </ListGroup>
       </div>
       <div>
         <h2>Tasks</h2>
-        <ul>
+        <ListGroup>
           {tasks.map(task => (
-            <li key={task.id}>
+            <ListGroup.Item key={task.id}>
               {task.document}: {task.description} ({task.status})
-            </li>
+            </ListGroup.Item>
           ))}
-        </ul>
+        </ListGroup>
       </div>
-      <p>{message}</p>
-    </div>
+    </Container>
   );
 }
 
