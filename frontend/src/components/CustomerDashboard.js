@@ -20,8 +20,8 @@ function CustomerDashboard() {
       navigate('/login');
       return;
     }
-    const decoded = jwtDecode(token);
-    const userId = decoded.user_id;
+    // Decode token to verify user, but no need to store userId unless used
+    jwtDecode(token);
 
     axios.get('/api/documents', { headers: { Authorization: `Bearer ${token}` } })
       .then(response => setDocuments(response.data.documents))
