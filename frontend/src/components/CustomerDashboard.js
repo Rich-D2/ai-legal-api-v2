@@ -166,4 +166,26 @@ function CustomerDashboard() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Document</Table
+                  <TableCell>Document</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tasks.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.document}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}
+
+export default CustomerDashboard;
