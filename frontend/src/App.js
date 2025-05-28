@@ -11,12 +11,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route element={<Layout />}>
-          <Route path="/" element={<CustomerDashboard />} />
-          <Route path="/customer" element={<CustomerDashboard />} />
-          <Route path="/paralegal" element={<ParalegalDashboard />} />
-          <Route path="/lawyer" element={<LawyerDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<CustomerDashboard />} />
+          <Route path="customer" element={<CustomerDashboard />} />
+          <Route path="paralegal" element={<ParalegalDashboard />} />
+          <Route path="lawyer" element={<LawyerDashboard />} />
+          <Route path="admin" element={<AdminDashboard />} />
           <Route path="*" element={<CustomerDashboard />} />
         </Route>
       </Routes>
