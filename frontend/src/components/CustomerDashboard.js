@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Form, Button, Table, Modal, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { Box, Card, CardContent, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions, Alert } from '@mui/material';
+import { UploadFile, AddTask } from '@mui/icons-material';
 
 function CustomerDashboard() {
   const [file, setFile] = useState(null);
@@ -11,7 +12,7 @@ function CustomerDashboard() {
   const [selectedDocument, setSelectedDocument] = useState('');
   const [tasks, setTasks] = useState([]);
   const [message, setMessage] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,7 +21,6 @@ function CustomerDashboard() {
       navigate('/login');
       return;
     }
-    // Decode token to verify user, but no need to store userId unless used
     jwtDecode(token);
 
     axios.get('/api/documents', { headers: { Authorization: `Bearer ${token}` } })
@@ -67,7 +67,7 @@ function CustomerDashboard() {
         setTasks([...tasks, response.data.task]);
         setTaskDescription('');
         setSelectedDocument('');
-        setShowModal(false);
+        setOpenDialog(false);
       })
       .catch(error => setMessage('Error submitting task'));
   };
@@ -80,111 +80,111 @@ function CustomerDashboard() {
   };
 
   return (
-    <div>
-      <h2>Customer Dashboard</h2>
-      {message && <Alert variant="info">{message}</Alert>}
-      <Card className="mb-4">
-        <Card.Header>Upload Document</Card.Header>
-        <Card.Body>
-          <Form>
-            <Form.Group controlId="formFile" className="mb-3">
-              <Form.Control type="file" onChange={handleFileChange} />
-            </Form.Group>
-            <Button variant="primary" onClick={handleUpload}>Upload</Button>
-          </Form>
-        </Card.Body>
+    <Box>
+      <Typography variant="h4" gutterBottom>Customer Dashboard</Typography>
+      {message && <Alert severity="info">{message}</Alert>}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6">Upload Document</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            <TextField type="file" onChange={handleFileChange} />
+            <Button variant="contained" startIcon={<UploadFile />} onClick={handleUpload} sx={{ ml: 2 }}>
+              Upload
+            </Button>
+          </Box>
+        </CardContent>
       </Card>
-      <Card className="mb-4">
-        <Card.Header>Submit Task</Card.Header>
-        <Card.Body>
-          <Button variant="outline-primary" onClick={() => setShowModal(true)}>
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6">Submit Task</Typography>
+          <Button variant="outlined" startIcon={<AddTask />} onClick={() => setOpenDialog(true)} sx={{ mt: 2 }}>
             Create Task
           </Button>
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Create Task</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group controlId="formDocumentSelect" className="mb-3">
-                  <Form.Label>Select Document</Form.Label>
-                  <Form.Select
-                    value={selectedDocument}
-                    onChange={(e) => setSelectedDocument(e.target.value)}
-                  >
-                    <option value="">Select a document</option>
-                    {documents.map(doc => (
-                      <option key={doc} value={doc}>{doc}</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group controlId="formTaskDescription" className="mb-3">
-                  <Form.Label>Task Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={taskDescription}
-                    onChange={(e) => setTaskDescription(e.target.value)}
-                    placeholder="Task description"
-                  />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
-              <Button variant="primary" onClick={handleTaskSubmit}>Submit Task</Button>
-            </Modal.Footer>
-          </Modal>
-        </Card.Body>
+          <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            <DialogTitle>Create Task</DialogTitle>
+            <DialogContent>
+              <TextField
+                select
+                label="Select Document"
+                value={selectedDocument}
+                onChange={(e) => setSelectedDocument(e.target.value)}
+                fullWidth
+                sx={{ mb: 2, mt: 1 }}
+                SelectProps={{ native: true }}
+              >
+                <option value="">Select a document</option>
+                {documents.map(doc => (
+                  <option key={doc} value={doc}>{doc}</option>
+                ))}
+              </TextField>
+              <TextField
+                label="Task Description"
+                value={taskDescription}
+                onChange={(e) => setTaskDescription(e.target.value)}
+                fullWidth
+                placeholder="Task description"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDialog(false)}>Close</Button>
+              <Button onClick={handleTaskSubmit} variant="contained">Submit Task</Button>
+            </DialogActions>
+          </Dialog>
+        </CardContent>
       </Card>
-      <Card className="mb-4">
-        <Card.Header>My Documents</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map(doc => (
-                <tr key={doc}>
-                  <td>{doc}</td>
-                  <td>
-                    <Button variant="link" onClick={() => handleAIProcess(doc)}>
-                      Process with AI
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6">My Documents</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map(doc => (
+                  <TableRow key={doc}>
+                    <TableCell>{doc}</TableCell>
+                    <TableCell>
+                      <Button variant="text" onClick={() => handleAIProcess(doc)}>
+                        Process with AI
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
       <Card>
-        <Card.Header>My Tasks</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-                <th>Description</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map(task => (
-                <tr key={task.id}>
-                  <td>{task.document}</td>
-                  <td>{task.description}</td>
-                  <td>{task.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+        <CardContent>
+          <Typography variant="h6">My Tasks</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tasks.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.document}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
 
