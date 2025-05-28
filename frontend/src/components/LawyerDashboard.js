@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Table, Button, Alert } from 'react-bootstrap';
+import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Alert } from '@mui/material';
+import { AutoFixHigh } from '@mui/icons-material';
 
 function LawyerDashboard() {
   const [documents, setDocuments] = useState([]);
@@ -19,35 +20,41 @@ function LawyerDashboard() {
   };
 
   return (
-    <div>
-      <h2>Lawyer Dashboard</h2>
-      {message && <Alert variant="info">{message}</Alert>}
+    <Box>
+      <Typography variant="h4" gutterBottom>Lawyer Dashboard</Typography>
+      {message && <Alert severity="info">{message}</Alert>}
       <Card>
-        <Card.Header>Documents</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map(doc => (
-                <tr key={doc}>
-                  <td>{doc}</td>
-                  <td>
-                    <Button variant="link" onClick={() => handleAIProcess(doc)}>
-                      Process with AI
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+        <CardContent>
+          <Typography variant="h6">Documents</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map(doc => (
+                  <TableRow key={doc}>
+                    <TableCell>{doc}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="text"
+                        startIcon={<AutoFixHigh />}
+                        onClick={() => handleAIProcess(doc)}
+                      >
+                        Process with AI
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
 
