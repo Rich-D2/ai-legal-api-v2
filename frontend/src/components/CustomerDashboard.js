@@ -254,9 +254,13 @@ function CustomerDashboard() {
                     sx={{ minWidth: 200, mr: 2 }}
                   >
                     <MenuItem value="">Select a case</MenuItem>
-                    {cases.map(caseItem => (
-                      <MenuItem key={caseItem.id} value={caseItem.id}>{caseItem.title}</MenuItem>
-                    ))}
+                    {cases.length === 0 ? (
+                      <MenuItem disabled>No cases available. Create one below.</MenuItem>
+                    ) : (
+                      cases.map(caseItem => (
+                        <MenuItem key={caseItem.id} value={caseItem.id}>{caseItem.title}</MenuItem>
+                      ))
+                    )}
                   </TextField>
                   <Button variant="contained" startIcon={<Add />} onClick={() => setOpenCaseDialog(true)}>
                     New Case
@@ -404,7 +408,7 @@ function CustomerDashboard() {
                 <ChatWidget caseId={selectedCase} />
               </>
             ) : (
-              <Typography>Please select a case to view documents and tasks.</Typography>
+              <Typography>Please select a case to view documents and tasks. Create a new case above to get started.</Typography>
             )}
           </>
         )}
