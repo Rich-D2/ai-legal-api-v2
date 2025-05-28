@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import CustomerDashboard from './components/CustomerDashboard.js';
+import CustomerDashboard from './components/CustomerDashboard';
 import ParalegalDashboard from './components/ParalegalDashboard';
 import LawyerDashboard from './components/LawyerDashboard';
 import AdminDashboard from './components/AdminDashboard';
