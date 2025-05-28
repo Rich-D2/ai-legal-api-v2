@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Table, Button, Alert } from 'react-bootstrap';
+import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Alert } from '@mui/material';
+import { CheckCircle } from '@mui/icons-material';
 
 function ParalegalDashboard() {
   const [documents, setDocuments] = useState([]);
@@ -21,61 +22,67 @@ function ParalegalDashboard() {
   };
 
   return (
-    <div>
-      <h2>Paralegal Dashboard</h2>
-      {message && <Alert variant="info">{message}</Alert>}
-      <Card className="mb-4">
-        <Card.Header>Customer Tasks</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map(task => (
-                <tr key={task.id}>
-                  <td>{task.document}</td>
-                  <td>{task.description}</td>
-                  <td>{task.status}</td>
-                  <td>
-                    <Button
-                      variant="success"
-                      onClick={() => handleCompleteTask(task.id)}
-                    >
-                      Complete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+    <Box>
+      <Typography variant="h4" gutterBottom>Paralegal Dashboard</Typography>
+      {message && <Alert severity="info">{message}</Alert>}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6">Customer Tasks</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tasks.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.document}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.status}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<CheckCircle />}
+                        onClick={() => handleCompleteTask(task.id)}
+                      >
+                        Complete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
       <Card>
-        <Card.Header>Documents</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map(doc => (
-                <tr key={doc}>
-                  <td>{doc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+        <CardContent>
+          <Typography variant="h6">Documents</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map(doc => (
+                  <TableRow key={doc}>
+                    <TableCell>{doc}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
 
