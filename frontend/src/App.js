@@ -8,6 +8,7 @@ import Login from './components/Login';
 import { Typography } from '@mui/material';
 
 function App() {
+  console.log('App component rendered');
   return (
     <BrowserRouter>
       <Routes>
