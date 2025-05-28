@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import { Box, Card, CardContent, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions, Alert } from '@mui/material';
+import { Box, Card, CardContent, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Grid } from '@mui/material';
+import { BarChart } from '@mui/x-charts/BarChart';
 import { UploadFile, AddTask } from '@mui/icons-material';
 
 function CustomerDashboard() {
@@ -13,6 +14,7 @@ function CustomerDashboard() {
   const [tasks, setTasks] = useState([]);
   const [message, setMessage] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,10 +81,42 @@ function CustomerDashboard() {
       .catch(error => setMessage('Error processing with AI'));
   };
 
+  const filteredDocuments = documents.filter(doc => doc.toLowerCase().includes(searchQuery.toLowerCase()));
+  const taskStatusCounts = tasks.reduce((acc, task) => {
+    acc[task.status] = (acc[task.status] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Customer Dashboard</Typography>
       {message && <Alert severity="info">{message}</Alert>}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Total Documents</Typography>
+              <Typography variant="h4">{documents.length}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Pending Tasks</Typography>
+              <Typography variant="h4">{taskStatusCounts.pending || 0}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Completed Tasks</Typography>
+              <Typography variant="h4">{taskStatusCounts.completed || 0}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6">Upload Document</Typography>
@@ -134,7 +168,25 @@ function CustomerDashboard() {
       </Card>
       <Card sx={{ mb: 4 }}>
         <CardContent>
+          <Typography variant="h6">Task Status Overview</Typography>
+          <BarChart
+            xAxis={[{ scaleType: 'band', data: Object.keys(taskStatusCounts) }]}
+            series={[{ data: Object.values(taskStatusCounts) }]}
+            width={500}
+            height={300}
+          />
+        </CardContent>
+      </Card>
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
           <Typography variant="h6">My Documents</Typography>
+          <TextField
+            label="Search Documents"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
           <TableContainer>
             <Table>
               <TableHead>
@@ -144,7 +196,7 @@ function CustomerDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {documents.map(doc => (
+                {filteredDocuments.map(doc => (
                   <TableRow key={doc}>
                     <TableCell>{doc}</TableCell>
                     <TableCell>
