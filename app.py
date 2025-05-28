@@ -23,11 +23,14 @@ app.config["S3_BUCKET"] = os.environ.get("S3_BUCKET", "your-s3-bucket-name")
 app.config["S3_REGION"] = os.environ.get("S3_REGION", "us-east-1")
 
 # Initialize S3 client
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
-)
+try:
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
+    )
+except Exception as e:
+    print(f"Error initializing S3 client: {str(e)}")
 
 # Initialize files
 for file in [TASKS_FILE, USERS_FILE, CASES_FILE, CHATS_FILE]:
@@ -47,7 +50,8 @@ def token_required(f):
         try:
             data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
             request.user_id = data["user_id"]
-        except:
+        except Exception as e:
+            print(f"Token error: {str(e)}")
             return jsonify({"error": "Token is invalid"}), 401
         return f(*args, **kwargs)
     return decorated
@@ -62,6 +66,7 @@ def serve(path):
         index_path = os.path.join(app.static_folder, "index.html")
         if os.path.exists(index_path):
             return send_from_directory(app.static_folder, "index.html")
+        print(f"Index file not found at {index_path}")
         return jsonify({"error": "React build folder not found."}), 500
     except Exception as e:
         print(f"Error serving path {path}: {str(e)}")
@@ -75,6 +80,7 @@ def login():
         email = data.get("email")
         password = data.get("password")
         if not os.path.exists(USERS_FILE):
+            print(f"Users file not found at {USERS_FILE}")
             return jsonify({"error": "Users file not found"}), 500
         with open(USERS_FILE, "r") as f:
             users = json.load(f)
@@ -125,6 +131,7 @@ def list_cases():
     try:
         user_id = request.user_id
         if not os.path.exists(CASES_FILE):
+            print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"cases": []}), 200
         with open(CASES_FILE, "r") as f:
             cases = json.load(f)
@@ -150,6 +157,7 @@ def upload_document():
 
         # Verify case exists and belongs to user
         if not os.path.exists(CASES_FILE):
+            print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
         with open(CASES_FILE, "r") as f:
             cases = json.load(f)
@@ -158,12 +166,16 @@ def upload_document():
             return jsonify({"error": "Case not found or unauthorized"}), 404
 
         # Upload to S3
-        s3_client.upload_fileobj(
-            file,
-            app.config["S3_BUCKET"],
-            filename,
-            ExtraArgs={'ServerSideEncryption': 'AES256'}
-        )
+        try:
+            s3_client.upload_fileobj(
+                file,
+                app.config["S3_BUCKET"],
+                filename,
+                ExtraArgs={'ServerSideEncryption': 'AES256'}
+            )
+        except Exception as e:
+            print(f"S3 upload error: {str(e)}")
+            return jsonify({"error": "Failed to upload to S3"}), 500
 
         # Update case with document
         case["documents"].append(filename)
@@ -189,11 +201,15 @@ def list_documents():
         user_id = request.user_id
         case_id = request.args.get("case_id")
         prefix = f"{user_id}/{case_id}/" if case_id else f"{user_id}/"
-        response = s3_client.list_objects_v2(
-            Bucket=app.config["S3_BUCKET"],
-            Prefix=prefix
-        )
-        documents = [obj["Key"].split("/")[-1] for obj in response.get("Contents", [])]
+        try:
+            response = s3_client.list_objects_v2(
+                Bucket=app.config["S3_BUCKET"],
+                Prefix=prefix
+            )
+            documents = [obj["Key"].split("/")[-1] for obj in response.get("Contents", [])]
+        except Exception as e:
+            print(f"S3 list error: {str(e)}")
+            return jsonify({"documents": []}), 200
         return jsonify({"documents": documents})
     except Exception as e:
         print(f"List documents error: {str(e)}")
@@ -214,6 +230,7 @@ def submit_task():
 
         # Verify case exists
         if not os.path.exists(CASES_FILE):
+            print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
         with open(CASES_FILE, "r") as f:
             cases = json.load(f)
@@ -249,6 +266,7 @@ def list_tasks():
         user_id = request.user_id
         case_id = request.args.get("case_id")
         if not os.path.exists(TASKS_FILE):
+            print(f"Tasks file not found at {TASKS_FILE}")
             return jsonify({"tasks": []}), 200
         with open(TASKS_FILE, "r") as f:
             tasks = json.load(f)
@@ -272,6 +290,7 @@ def ai_chat():
 
         # Verify case exists
         if not os.path.exists(CASES_FILE):
+            print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
         with open(CASES_FILE, "r") as f:
             cases = json.load(f)
@@ -325,6 +344,7 @@ def list_chats():
         user_id = request.user_id
         case_id = request.args.get("case_id")
         if not os.path.exists(CHATS_FILE):
+            print(f"Chats file not found at {CHATS_FILE}")
             return jsonify({"chats": []}), 200
         with open(CHATS_FILE, "r") as f:
             chats = json.load(f)
