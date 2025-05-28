@@ -7,18 +7,17 @@ import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 
 function App() {
+  console.log('App component rendered');
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Layout />}>
-          <Route index element={<CustomerDashboard />} />
-          <Route path="customer" element={<CustomerDashboard />} />
-          <Route path="paralegal" element={<ParalegalDashboard />} />
-          <Route path="lawyer" element={<LawyerDashboard />} />
-          <Route path="admin" element={<AdminDashboard />} />
-          <Route path="*" element={<CustomerDashboard />} />
-        </Route>
+        <Route path="/" element={<CustomerDashboard />} />
+        <Route path="/customer" element={<CustomerDashboard />} />
+        <Route path="/paralegal" element={<ParalegalDashboard />} />
+        <Route path="/lawyer" element={<LawyerDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="*" element={<Typography>404 - Page Not Found</Typography>} />
       </Routes>
     </BrowserRouter>
   );
