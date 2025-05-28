@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Table, Alert } from 'react-bootstrap';
+import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert } from '@mui/material';
 
 function AdminDashboard() {
   const [documents, setDocuments] = useState([]);
@@ -17,52 +17,56 @@ function AdminDashboard() {
   }, []);
 
   return (
-    <div>
-      <h2>Admin Dashboard</h2>
-      {message && <Alert variant="info">{message}</Alert>}
-      <Card className="mb-4">
-        <Card.Header>Documents</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map(doc => (
-                <tr key={doc}>
-                  <td>{doc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+    <Box>
+      <Typography variant="h4" gutterBottom>Admin Dashboard</Typography>
+      {message && <Alert severity="info">{message}</Alert>}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6">Documents</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map(doc => (
+                  <TableRow key={doc}>
+                    <TableCell>{doc}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
       <Card>
-        <Card.Header>Tasks</Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Document</th>
-                <th>Description</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map(task => (
-                <tr key={task.id}>
-                  <td>{task.document}</td>
-                  <td>{task.description}</td>
-                  <td>{task.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+        <CardContent>
+          <Typography variant="h6">Tasks</Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tasks.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.document}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
 
