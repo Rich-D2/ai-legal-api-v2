@@ -8,17 +8,16 @@ import Login from './components/Login';
 import { Typography } from '@mui/material';
 
 function App() {
-  console.log('App component rendered');
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<Layout />}>
-          <Route path="/" element={<CustomerDashboard />} />
-          <Route path="/customer" element={<CustomerDashboard />} />
-          <Route path="/paralegal" element={<ParalegalDashboard />} />
-          <Route path="/lawyer" element={<LawyerDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route index element={<CustomerDashboard />} />
+          <Route path="customer" element={<CustomerDashboard />} />
+          <Route path="paralegal" element={<ParalegalDashboard />} />
+          <Route path="lawyer" element={<LawyerDashboard />} />
+          <Route path="admin" element={<AdminDashboard />} />
           <Route path="*" element={<Typography variant="h6">404 - Page Not Found</Typography>} />
         </Route>
       </Routes>
