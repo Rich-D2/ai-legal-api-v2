@@ -206,7 +206,7 @@ function CustomerDashboard() {
 
   return (
     <ErrorBoundary>
-      <Box>
+      <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>Customer Dashboard</Typography>
         {message && <Alert severity="info">{message}</Alert>}
         {error && <Alert severity="error">{error}</Alert>}
