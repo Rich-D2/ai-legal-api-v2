@@ -81,10 +81,10 @@ function CustomerDashboard() {
           const [documentsResponse, tasksResponse] = await Promise.all([
             axios.get(`/api/documents?case_id=${selectedCase}`, {
               headers: { Authorization: `Bearer ${token}` }
-            }),
+            }).catch(e => ({ data: { documents: [] } })), // Fallback to empty array
             axios.get(`/api/tasks?case_id=${selectedCase}`, {
               headers: { Authorization: `Bearer ${token}` }
-            })
+            }).catch(e => ({ data: { tasks: [] } })) // Fallback to empty array
           ]);
           console.log('Documents response:', documentsResponse.data);
           console.log('Tasks response:', tasksResponse.data);
@@ -97,7 +97,7 @@ function CustomerDashboard() {
         setError('');
       } catch (error) {
         console.error('Fetch error:', error.response || error);
-        setError(`Failed to load data: ${error.message}`);
+        setError(`Failed to load data: ${error.message || 'Unknown error'}`);
       } finally {
         setLoading(false);
       }
