@@ -1,30 +1,57 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { Container, Box, Card, CardContent, Typography, TextField, Button, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post('/api/login', { email, password })
-      .then(response => {
-        localStorage.setItem('token', response.data.token);
+    setMessage('');
+    setError('');
+    console.log('Login attempt:', { email });
+
+    // Mock login for testing
+    if (process.env.REACT_APP_MOCK_LOGIN === 'true') {
+      localStorage.setItem('token', 'mock-token');
+      setMessage('Mock login successful');
+      navigate('/customer');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        setMessage('Login successful');
         navigate('/customer');
-      })
-      .catch(error => setMessage('Login failed. Please check your credentials.'));
+      } else {
+        setError(data.error || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Server error during login');
+    }
   };
+
+  console.log('Rendering Login component');
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
       <Card>
         <CardContent>
           <Typography variant="h5" gutterBottom>Login</Typography>
-          {message && <Alert severity="error">{message}</Alert>}
+          {message && <Alert severity="success">{message}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
               fullWidth
@@ -46,6 +73,9 @@ function Login() {
               Login
             </Button>
           </Box>
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Test credentials: test@example.com / password123
+          </Typography>
         </CardContent>
       </Card>
     </Container>
