@@ -5,14 +5,15 @@ import ParalegalDashboard from './components/ParalegalDashboard';
 import LawyerDashboard from './components/LawyerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
+import Register from './components/Register';
 import { Typography } from '@mui/material';
 
 function App() {
-  console.log('App component rendered');
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route element={<Layout />}>
           <Route index element={<CustomerDashboard />} />
           <Route path="customer" element={<CustomerDashboard />} />
