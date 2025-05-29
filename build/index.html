@@ -1,0 +1,13 @@
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+  try:
+    if path.startswith("api/"):
+      return jsonify({"error": "API route not found"}), 404
+    index_path = os.path.join(app.static_folder, "index.html")
+    if os.path.exists(index_path):
+      return send_from_directory(app.static_folder, "index.html")
+    return jsonify({"error": "React build folder not found."}), 500
+  except Exception as e:
+    print(f"Error serving path {path}: {str(e)}")
+    return jsonify({"error": "Server error"}), 500
