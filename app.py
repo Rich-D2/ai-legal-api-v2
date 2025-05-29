@@ -107,14 +107,16 @@ def serve(path):
         if path.startswith("api/"):
             return jsonify({"error": "API route not found"}), 404
 
-        full_path = os.path.join(app.static_folder, path)
-        if path != "" and os.path.exists(full_path):
-            return send_from_directory(app.static_folder, path)
+        index_path = os.path.join(app.static_folder, "index.html")
+        if os.path.exists(index_path):
+            return send_from_directory(app.static_folder, "index.html")
 
-        return send_from_directory(app.static_folder, "index.html")
+        return jsonify({"error": "React build folder not found."}), 500
+
     except Exception as e:
         print(f"Error serving path {path}: {str(e)}")
         return jsonify({"error": "Server error"}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
