@@ -1,99 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Alert, Grid, TextField } from '@mui/material';
-import { BarChart, AutoFixHigh } from '@mui/icons-material';
+import { Box, Typography, Alert } from '@mui/material';
 
 function LawyerDashboard() {
-  const [documents, setDocuments] = useState([]);
   const [message, setMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/documents')
-      .then(response => setDocuments(response.data.documents))
-      .catch(error => setMessage('Error fetching documents'));
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/lawyer', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setMessage(data.message);
+        } else {
+          setError(data.error || 'Failed to load data');
+        }
+      } catch (err) {
+        setError('Server error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const handleAIProcess = (doc) => {
-    axios.post('/api/ai/process', { document: doc })
-      .then(response => setMessage(response.data.message))
-      .catch(error => setMessage('Error processing document'));
-  };
-
-  const filteredDocuments = documents.filter(doc => doc.toLowerCase().includes(searchQuery.toLowerCase()));
-  const documentCount = documents.length;
-
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>Lawyer Dashboard</Typography>
+      {loading && <Typography>Loading...</Typography>}
+      {error && <Alert severity="error">{error}</Alert>}
       {message && <Alert severity="info">{message}</Alert>}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Documents</Typography>
-              <Typography variant="h4">{documentCount}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">AI Processed</Typography>
-              <Typography variant="h4">0</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography variant="h6">Document Overview</Typography>
-          <BarChart
-            xAxis={[{ scaleType: 'band', data: ['Documents'] }]}
-            series={[{ data: [documentCount] }]}
-            width={500}
-            height={300}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent>
-          <Typography variant="h6">Documents</Typography>
-          <TextField
-            label="Search Documents"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Document</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredDocuments.map(doc => (
-                  <TableRow key={doc}>
-                    <TableCell>{doc}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="text"
-                        startIcon={<AutoFixHigh />}
-                        onClick={() => handleAIProcess(doc)}
-                      >
-                        Process with AI
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+      <Typography variant="body1">Welcome to the Lawyer Dashboard!</Typography>
     </Box>
   );
 }
