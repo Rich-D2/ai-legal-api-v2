@@ -11,7 +11,7 @@ services:
     startCommand: gunicorn app:app
     envVars:
       - key: SECRET_KEY
-        value: your-secret-key-goes-here
+        value: Us8vGARh31iSm7UJ409mwl9rMfoZGrBP
     autoDeploy: true
     branch: main
     buildFilter:
