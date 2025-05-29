@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: flask-react-app
+    runtime: python
+    env: python
+    plan: free
+    buildCommand: |
+      npm install
+      npm run build
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        value: your-secret-key-goes-here
+    autoDeploy: true
+    branch: main
+    buildFilter:
+      paths:
+        - package.json
+        - public/**
+        - src/**
+        - app.py
+        - requirements.txt
