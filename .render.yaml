@@ -5,12 +5,12 @@ services:
     plan: free
     buildCommand: |
       python -m pip install --upgrade pip
-      pip install --no-cache-dir -r requirements.txt
+      /opt/render/project/.venv/bin/pip install --no-cache-dir -r requirements.txt --verbose
       cd frontend
       npm install --verbose
       npm run build --verbose
       mv build ..
-    startCommand: /opt/render/project/src/.venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app
+    startCommand: /opt/render/project/.venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
@@ -21,4 +21,4 @@ services:
       - key: PORT
         value: 8000
       - key: SECRET_KEY
-        sync: false
+        value: Us8vGARh31iSm7UJ409mwl9rMfoZGrBP
