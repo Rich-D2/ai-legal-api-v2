@@ -1,23 +1,23 @@
 services:
   - type: web
-    name: flask-react-app
-    runtime: python
+    name: ai-legal-api-v2
     env: python
     plan: free
     buildCommand: |
+      pip install -r requirements.txt
+      cd frontend
       npm install
       npm run build
-      pip install -r requirements.txt
-    startCommand: gunicorn app:app
+      mv build ..
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: NODE_VERSION
+        value: 20.19.2
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 8000
       - key: SECRET_KEY
-        value: Us8vGARh31iSm7UJ409mwl9rMfoZGrBP
-    autoDeploy: true
-    branch: main
-    buildFilter:
-      paths:
-        - package.json
-        - public/**
-        - src/**
-        - app.py
-        - requirements.txt
+        sync: false
