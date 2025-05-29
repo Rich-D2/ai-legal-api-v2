@@ -37,6 +37,7 @@ for file in [TASKS_FILE, USERS_FILE, CASES_FILE, CHATS_FILE]:
     if not os.path.exists(file):
         with open(file, "w") as f:
             json.dump([], f)
+        os.chmod(file, 0o666)  # Ensure writable
 
 # JWT authentication decorator
 def token_required(f):
@@ -61,7 +62,8 @@ def token_required(f):
 @app.route("/<path:path>")
 def serve(path):
     try:
-        if path.startswith("api/"):
+        print(f"Serving path: {path}")  # Debug log
+        if path and path.startswith("api/"):
             return jsonify({"error": "API route not found"}), 404
         index_path = os.path.join(app.static_folder, "index.html")
         if os.path.exists(index_path):
@@ -79,6 +81,7 @@ def login():
         data = request.get_json()
         email = data.get("email")
         password = data.get("password")
+        print(f"Login attempt: {email}")  # Debug log
         if not os.path.exists(USERS_FILE):
             print(f"Users file not found at {USERS_FILE}")
             return jsonify({"error": "Users file not found"}), 500
@@ -90,7 +93,9 @@ def login():
                     "user_id": user["id"],
                     "exp": datetime.utcnow() + timedelta(hours=24)
                 }, app.config["SECRET_KEY"], algorithm="HS256")
+                print(f"Login successful for {email}")
                 return jsonify({"token": token})
+        print(f"Invalid credentials for {email}")
         return jsonify({"error": "Invalid credentials"}), 401
     except Exception as e:
         print(f"Login error: {str(e)}")
@@ -368,13 +373,28 @@ def ai_process():
         return jsonify({"error": "Server error"}), 500
 
 # Debug route
-@app.route("/api/debug-list")
-def debug_list():
+@app.route("/api/debug")
+def debug():
     try:
-        build_contents = os.listdir("./build") if os.path.exists("./build") else []
-        return jsonify({"build_contents": build_contents})
+        build_exists = os.path.exists("./build")
+        index_exists = os.path.exists(os.path.join(app.static_folder, "index.html"))
+        files = {
+            "users.json": os.path.exists(USERS_FILE),
+            "cases.json": os.path.exists(CASES_FILE),
+            "tasks.json": os.path.exists(TASKS_FILE),
+            "chats.json": os.path.exists(CHATS_FILE)
+        }
+        s3_status = "connected" if s3_client else "failed"
+        return jsonify({
+            "build_folder": build_exists,
+            "index_html": index_exists,
+            "files": files,
+            "s3_status": s3_status,
+            "python_version": os.environ.get("PYTHON_VERSION"),
+            "node_version": os.environ.get("NODE_VERSION")
+        })
     except Exception as e:
-        print(f"Debug list error: {str(e)}")
+        print(f"Debug error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
