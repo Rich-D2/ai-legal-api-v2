@@ -1,138 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Alert, Grid, TextField } from '@mui/material';
-import { BarChart, CheckCircle } from '@mui/icons-material';
+import { Box, Typography, Alert } from '@mui/material';
 
 function ParalegalDashboard() {
-  const [documents, setDocuments] = useState([]);
-  const [tasks, setTasks] = useState([]);
   const [message, setMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/documents')
-      .then(response => setDocuments(response.data.documents))
-      .catch(error => setMessage('Error fetching documents'));
-    axios.get('/api/tasks')
-      .then(response => setTasks(response.data.tasks))
-      .catch(error => setMessage('Error fetching tasks'));
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/paralegal', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setMessage(data.message);
+        } else {
+          setError(data.error || 'Failed to load data');
+        }
+      } catch (err) {
+        setError('Server error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const handleCompleteTask = (taskId) => {
-    setMessage(`Task ${taskId} marked as completed (placeholder)`);
-  };
-
-  const filteredTasks = tasks.filter(task => task.description.toLowerCase().includes(searchQuery.toLowerCase()));
-  const taskStatusCounts = tasks.reduce((acc, task) => {
-    acc[task.status] = (acc[task.status] || 0) + 1;
-    return acc;
-  }, {});
-
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>Paralegal Dashboard</Typography>
+      {loading && <Typography>Loading...</Typography>}
+      {error && <Alert severity="error">{error}</Alert>}
       {message && <Alert severity="info">{message}</Alert>}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Tasks</Typography>
-              <Typography variant="h4">{tasks.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Pending Tasks</Typography>
-              <Typography variant="h4">{taskStatusCounts.pending || 0}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Documents</Typography>
-              <Typography variant="h4">{documents.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography variant="h6">Task Status Overview</Typography>
-          <BarChart
-            xAxis={[{ scaleType: 'band', data: Object.keys(taskStatusCounts) }]}
-            series={[{ data: Object.values(taskStatusCounts) }]}
-            width={500}
-            height={300}
-          />
-        </CardContent>
-      </Card>
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography variant="h6">Customer Tasks</Typography>
-          <TextField
-            label="Search Tasks"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Document</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredTasks.map(task => (
-                  <TableRow key={task.id}>
-                    <TableCell>{task.document}</TableCell>
-                    <TableCell>{task.description}</TableCell>
-                    <TableCell>{task.status}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        startIcon={<CheckCircle />}
-                        onClick={() => handleCompleteTask(task.id)}
-                      >
-                        Complete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent>
-          <Typography variant="h6">Documents</Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Document</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {documents.map(doc => (
-                  <TableRow key={doc}>
-                    <TableCell>{doc}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+      <Typography variant="body1">Welcome to the Paralegal Dashboard!</Typography>
     </Box>
   );
 }
