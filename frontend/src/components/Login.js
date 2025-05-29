@@ -13,16 +13,6 @@ function Login() {
     e.preventDefault();
     setMessage('');
     setError('');
-    console.log('Login attempt:', { email });
-
-    // Mock login for testing
-    if (process.env.REACT_APP_MOCK_LOGIN === 'true') {
-      localStorage.setItem('token', 'mock-token');
-      setMessage('Mock login successful');
-      navigate('/customer');
-      return;
-    }
-
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -38,12 +28,9 @@ function Login() {
         setError(data.error || 'Login failed');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError('Server error during login');
     }
   };
-
-  console.log('Rendering Login component');
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
