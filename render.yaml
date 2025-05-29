@@ -4,12 +4,13 @@ services:
     env: python
     plan: free
     buildCommand: |
-      pip install -r requirements.txt
+      python -m pip install --upgrade pip
+      pip install --no-cache-dir -r requirements.txt
       cd frontend
-      npm install
-      npm run build
+      npm install --verbose
+      npm run build --verbose
       mv build ..
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    startCommand: /opt/render/project/src/.venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
