@@ -25,7 +25,9 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = None
         if 'Authorization' in request.headers:
-            token = request.headers['Authorization'].split(" ")[1]
+            parts = request.headers['Authorization'].split(" ")
+            if len(parts) == 2:
+                token = parts[1]
         if not token:
             return jsonify({"error": "Token is missing"}), 401
         try:
@@ -35,19 +37,6 @@ def token_required(f):
             return jsonify({"error": "Token is invalid"}), 401
         return f(*args, **kwargs)
     return decorated
-
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve(path):
-    try:
-        if path and path.startswith("api/"):
-            return jsonify({"error": "API route not found"}), 404
-        index_path = os.path.join(app.static_folder, "index.html")
-        if os.path.exists(index_path):
-            return send_from_directory(app.static_folder, "index.html")
-        return jsonify({"error": "React build folder not found."}), 500
-    except Exception as e:
-        return jsonify({"error": "Server error"}), 500
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -110,5 +99,22 @@ def lawyer():
 def admin():
     return jsonify({"message": "Admin dashboard data"})
 
+# Static file serving for React build
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    try:
+        if path.startswith("api/"):
+            return jsonify({"error": "API route not found"}), 404
+
+        full_path = os.path.join(app.static_folder, path)
+        if path != "" and os.path.exists(full_path):
+            return send_from_directory(app.static_folder, path)
+
+        return send_from_directory(app.static_folder, "index.html")
+    except Exception as e:
+        print(f"Error serving path {path}: {str(e)}")
+        return jsonify({"error": "Server error"}), 500
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
