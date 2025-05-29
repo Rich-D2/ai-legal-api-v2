@@ -22,7 +22,6 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key")
 app.config["S3_BUCKET"] = os.environ.get("S3_BUCKET", "your-s3-bucket-name")
 app.config["S3_REGION"] = os.environ.get("S3_REGION", "us-east-1")
 
-# Initialize S3 client
 try:
     s3_client = boto3.client(
         's3',
@@ -32,14 +31,12 @@ try:
 except Exception as e:
     print(f"Error initializing S3 client: {str(e)}")
 
-# Initialize files
 for file in [TASKS_FILE, USERS_FILE, CASES_FILE, CHATS_FILE]:
     if not os.path.exists(file):
         with open(file, "w") as f:
             json.dump([], f)
-        os.chmod(file, 0o666)  # Ensure writable
+        os.chmod(file, 0o666)
 
-# JWT authentication decorator
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -57,12 +54,11 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# Serve React app
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
     try:
-        print(f"Serving path: {path}")  # Debug log
+        print(f"Serving path: {path}")
         if path and path.startswith("api/"):
             return jsonify({"error": "API route not found"}), 404
         index_path = os.path.join(app.static_folder, "index.html")
@@ -74,14 +70,13 @@ def serve(path):
         print(f"Error serving path {path}: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# User login
 @app.route("/api/login", methods=["POST"])
 def login():
     try:
         data = request.get_json()
         email = data.get("email")
         password = data.get("password")
-        print(f"Login attempt: {email}")  # Debug log
+        print(f"Login attempt: {email}")
         if not os.path.exists(USERS_FILE):
             print(f"Users file not found at {USERS_FILE}")
             return jsonify({"error": "Users file not found"}), 500
@@ -101,7 +96,6 @@ def login():
         print(f"Login error: {str(e)}")
         return jsonify({"error": "Server error during login"}), 500
 
-# Create case
 @app.route("/api/cases", methods=["POST"])
 @token_required
 def create_case():
@@ -129,7 +123,6 @@ def create_case():
         print(f"Case creation error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# List cases
 @app.route("/api/cases", methods=["GET"])
 @token_required
 def list_cases():
@@ -146,7 +139,6 @@ def list_cases():
         print(f"List cases error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# Document upload
 @app.route("/api/documents", methods=["POST"])
 @token_required
 def upload_document():
@@ -160,7 +152,6 @@ def upload_document():
         user_id = request.user_id
         filename = f"{user_id}/{case_id}/{uuid.uuid4()}_{file.filename}"
 
-        # Verify case exists and belongs to user
         if not os.path.exists(CASES_FILE):
             print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
@@ -170,7 +161,6 @@ def upload_document():
         if not case:
             return jsonify({"error": "Case not found or unauthorized"}), 404
 
-        # Upload to S3
         try:
             s3_client.upload_fileobj(
                 file,
@@ -182,7 +172,6 @@ def upload_document():
             print(f"S3 upload error: {str(e)}")
             return jsonify({"error": "Failed to upload to S3"}), 500
 
-        # Update case with document
         case["documents"].append(filename)
         with open(CASES_FILE, "r+") as f:
             cases = json.load(f)
@@ -198,7 +187,6 @@ def upload_document():
         print(f"Document upload error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# List documents
 @app.route("/api/documents", methods=["GET"])
 @token_required
 def list_documents():
@@ -220,7 +208,6 @@ def list_documents():
         print(f"List documents error: {str(e)}")
         return jsonify({"documents": []}), 200
 
-# Customer task submission
 @app.route("/api/tasks", methods=["POST"])
 @token_required
 def submit_task():
@@ -233,7 +220,6 @@ def submit_task():
             return jsonify({"error": "Document, description, and case_id required"}), 400
         user_id = request.user_id
 
-        # Verify case exists
         if not os.path.exists(CASES_FILE):
             print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
@@ -263,7 +249,6 @@ def submit_task():
         print(f"Task submission error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# List tasks
 @app.route("/api/tasks", methods=["GET"])
 @token_required
 def list_tasks():
@@ -281,7 +266,6 @@ def list_tasks():
         print(f"List tasks error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# AI chat
 @app.route("/api/ai/chat", methods=["POST"])
 @token_required
 def ai_chat():
@@ -293,7 +277,6 @@ def ai_chat():
             return jsonify({"error": "Message and case_id required"}), 400
         user_id = request.user_id
 
-        # Verify case exists
         if not os.path.exists(CASES_FILE):
             print(f"Cases file not found at {CASES_FILE}")
             return jsonify({"error": "Cases file not found"}), 500
@@ -303,7 +286,6 @@ def ai_chat():
         if not case:
             return jsonify({"error": "Case not found or unauthorized"}), 404
 
-        # Placeholder AI response (replace with Grok API call)
         response = f"AI response to: {message} (case: {case_id})"
 
         chat = {
@@ -315,7 +297,6 @@ def ai_chat():
             "timestamp": datetime.utcnow().isoformat()
         }
 
-        # Store chat
         if not os.path.exists(CHATS_FILE):
             with open(CHATS_FILE, "w") as f:
                 json.dump([], f)
@@ -325,7 +306,6 @@ def ai_chat():
             f.seek(0)
             json.dump(chats, f)
 
-        # Update case with chat ID
         case["chat_ids"].append(chat["id"])
         with open(CASES_FILE, "r+") as f:
             cases = json.load(f)
@@ -341,7 +321,6 @@ def ai_chat():
         print(f"AI chat error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# List chats
 @app.route("/api/ai/chats", methods=["GET"])
 @token_required
 def list_chats():
@@ -359,7 +338,6 @@ def list_chats():
         print(f"List chats error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# AI process
 @app.route("/api/ai/process", methods=["POST"])
 @token_required
 def ai_process():
@@ -372,7 +350,6 @@ def ai_process():
         print(f"AI process error: {str(e)}")
         return jsonify({"error": "Server error"}), 500
 
-# Debug route
 @app.route("/api/debug")
 def debug():
     try:
