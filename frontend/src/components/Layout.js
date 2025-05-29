@@ -1,7 +1,6 @@
 import React from 'react';
+import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Container, Box } from '@mui/material';
-import { Dashboard, People, Assignment, Gavel } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -11,7 +10,7 @@ function Layout({ children }) {
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            AI Legal API
+            AI Legal Dashboard
           </Typography>
         </Toolbar>
       </AppBar>
@@ -26,30 +25,22 @@ function Layout({ children }) {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            <ListItem button component={Link} to="/customer">
-              <ListItemIcon><Dashboard /></ListItemIcon>
-              <ListItemText primary="Customer Dashboard" />
-            </ListItem>
-            <ListItem button component={Link} to="/paralegal">
-              <ListItemIcon><People /></ListItemIcon>
-              <ListItemText primary="Paralegal Dashboard" />
-            </ListItem>
-            <ListItem button component={Link} to="/lawyer">
-              <ListItemIcon><Gavel /></ListItemIcon>
-              <ListItemText primary="Lawyer Dashboard" />
-            </ListItem>
-            <ListItem button component={Link} to="/admin">
-              <ListItemIcon><Assignment /></ListItemIcon>
-              <ListItemText primary="Admin Dashboard" />
-            </ListItem>
+            {[
+              { text: 'Customer', path: '/customer' },
+              { text: 'Paralegal', path: '/paralegal' },
+              { text: 'Lawyer', path: '/lawyer' },
+              { text: 'Admin', path: '/admin' },
+            ].map((item) => (
+              <ListItem button key={item.text} component={Link} to={item.path}>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
           </List>
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <Container maxWidth="lg">
-          {children}
-        </Container>
+        {children}
       </Box>
     </Box>
   );
