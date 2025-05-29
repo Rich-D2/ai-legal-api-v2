@@ -18,7 +18,7 @@ if not os.path.exists(USERS_FILE):
         json.dump([], f)
     os.chmod(USERS_FILE, 0o666)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "Us8vGARh31iSm7UJ409mwl9rMfoZGrBP")
 
 def token_required(f):
     @wraps(f)
